@@ -9,7 +9,7 @@ sc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sc.connect((host, port))
 
 def handleInt(signum, frame):
-    print("exit")
+    print("\nexit")
     sys.exit()
 
 signal.signal(signal.SIGINT, handleInt)

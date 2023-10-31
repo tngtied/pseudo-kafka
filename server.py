@@ -8,20 +8,23 @@ port_b = int(sys.argv[3])
 
 events_queue = Queue()
 
-def producer_worker(conn):
+def producer_worker():
     while True:
-        events = conn.recv(1000).decode()
-        print("[Events created]")
+        events = producer_conn.recv(1000).decode()
         if not events:
-            conn.close()
+            producer_conn.close()
+            #comment out before submission
+            print("[Producer disconnected]")
             break
         ##이거 괜찮은 거 맞나?
+        print("[Events created]")
         for index in range(0, len(events)):
             events_queue.put(events[index])
-    ##producer 단위 확인용 iteration
-    print("in queue: ")
-    for event in iter(events_queue.get, None):
-        print("  %c" % event)
+    # ##producer 단위 확인용 iteration
+    # print("in queue: ")
+    # for event in iter(events_queue.get, None):
+    #     print("  %c" % event)
+        print("[Remain events: %d]" % events_queue.qsize())
         
 
 
@@ -36,7 +39,7 @@ if (__name__ == '__main__'):
     producer_conn, producer_addr = producer_socket.accept()
     print("[Producer connected]")
     
-    producer_thread = Thread(target = producer_worker, args=(producer_conn, )) 
+    producer_thread = Thread(target = producer_worker) 
     producer_thread.start()
 
     # consumer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
