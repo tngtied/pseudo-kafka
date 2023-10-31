@@ -1,4 +1,4 @@
-import socket, time, sys
+import socket, time, sys, signal
 
 host = sys.argv[1]
 port = int(sys.argv[2])
@@ -8,11 +8,14 @@ sc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 sc.connect((host, port))
 
+def handleInt(signum, frame):
+    print("exit")
+    sys.exit()
+
+signal.signal(signal.SIGINT, handleInt)
+
 while True:
     events = input()
     print("%d events are created" % len(events))
 
     sc.send(events.encode())
-    if (KeyboardInterrupt):
-        print("exit")
-        sys.exit

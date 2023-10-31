@@ -8,13 +8,12 @@ port_b = int(sys.argv[3])
 
 events_queue = Queue()
 
-print(sys.argv)
-
-def producer_worker(sc):
+def producer_worker(conn):
     while True:
-        events = sc.accept()
+        events = conn.recv(1000).decode()
         print("[Events created]")
         if not events:
+            conn.close()
             break
         ##이거 괜찮은 거 맞나?
         for index in range(0, len(events)):
@@ -34,9 +33,10 @@ if (__name__ == '__main__'):
     producer_socket.bind((host, port_a))
     producer_socket.listen(5)    
 
-    producer_socket_, producer_addr = producer_socket.accept()
+    producer_conn, producer_addr = producer_socket.accept()
     print("[Producer connected]")
-    producer_thread = Thread(target = producer_worker, args=(producer_socket, )) 
+    
+    producer_thread = Thread(target = producer_worker, args=(producer_conn, )) 
     producer_thread.start()
 
     # consumer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
