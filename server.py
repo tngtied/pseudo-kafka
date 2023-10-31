@@ -1,4 +1,4 @@
-import socket, sys
+import socket, sys, signal
 from threading import Thread
 from queue import Queue
 
@@ -25,10 +25,29 @@ def producer_worker():
     # for event in iter(events_queue.get, None):
     #     print("  %c" % event)
         print("[Remain events: %d]" % events_queue.qsize())
-        
 
+def consumer_worker(conn, num):
+    conn.send(num.encode())
+    while True:
+        events = conn.recv(1000).decode()
+        if not events:
+            conn.close()
+            print("[Consumer %d disconnected]" % num)
+            consumer_count-=1
+            if (consumer_count == 0):
+                print("[0 consumers online]")
+            break
+        if (events_queue.empty()):
+            conn.send("No event in queue".encode())
+        else:
+            conn.send(events_queue.get().encode())
+            print("[Remain events: %d]" % events_queue.qsize())
 
-# def consumer_worker(...): ...
+def handleInt(signum, frame):
+    print("\nexit")
+    sys.exit()
+
+signal.signal(signal.SIGINT, handleInt)
 
 if (__name__ == '__main__'):
     producer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,15 +61,20 @@ if (__name__ == '__main__'):
     producer_thread = Thread(target = producer_worker) 
     producer_thread.start()
 
-    # consumer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # consumer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # consumer_socket.bind((host, port_b))
-    # consumer_socket.listen(5)
+    consumer_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    consumer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    consumer_socket.bind((host, port_b))
+    consumer_socket.listen(5)
 
-    # consumer_group = []
-    # consumer_count = 0
-    # while True: 
-    #     conn
+    consumer_group = []
+    consumer_count = 0
+    consumer_cumul_count = 0
+    while True: 
+        consumer_conn, consumer_addr = consumer_socket.accept()
 
-    #     worker_thread = Thread(target = consumer_worker, args=(,))
-    #     worker_thread.start()
+        consumer_count+=1
+        consumer_cumul_count+=1
+        consumer_group.append(consumer_conn)
+
+        worker_thread = Thread(target = consumer_worker, args=(consumer_conn, consumer_cumul_count))
+        worker_thread.start()
