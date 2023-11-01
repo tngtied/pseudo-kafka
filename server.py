@@ -7,9 +7,6 @@ port_a = int(sys.argv[2])
 port_b = int(sys.argv[3])
 
 events_queue = Queue()
-consumer_group = []
-consumer_count = 0
-consumer_cumul_count = 0
 
 def producer_worker():
     global producer_conn
@@ -39,7 +36,7 @@ def consumer_worker(conn, num):
             conn.close()
             print("[Consumer %d disconnected]" % num)
             consumer_count-=1
-            print("[{consumer_count} consumers online]")
+            print(f"[{consumer_count} consumers online]")
             break
         if (events_queue.empty()):
             conn.send("No event in queue".encode())
@@ -70,13 +67,16 @@ if (__name__ == '__main__'):
     consumer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     consumer_socket.bind((host, port_b))
     consumer_socket.listen(5)
+    consumer_group = []
+    consumer_count = 0
+    consumer_cumul_count = 0
 
     while True: 
         consumer_conn, consumer_addr = consumer_socket.accept()
         consumer_count+=1
         consumer_cumul_count+=1
-        print("[Consumer {consumer_culmul_count} connected]")
-        print("[{consumer_count} consumers online]")
+        print(f"[Consumer {consumer_cumul_count} connected]")
+        print(f"[{consumer_count} consumers online]")
 
 
         consumer_group.append(consumer_conn)
