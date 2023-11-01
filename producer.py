@@ -1,4 +1,4 @@
-import socket, time, sys, signal
+import socket, sys, signal
 
 host = sys.argv[1]
 port = int(sys.argv[2])
