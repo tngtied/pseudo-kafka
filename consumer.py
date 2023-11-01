@@ -16,10 +16,10 @@ signal.signal(signal.SIGINT, handleInt)
 
 while True:
     sc.send('give me message'.encode())
-    msg = sc.recv(100).decode()
+    msg = sc.recv(500).decode()
 
     if (len(msg)>1):
         print(msg)
     else:
-        print("Event %c is processed in consumer %d" % msg, consumer_number)
+        print(f"Event {msg} is processed in consumer {consumer_number}")
     time.sleep(1)

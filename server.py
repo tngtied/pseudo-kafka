@@ -7,8 +7,12 @@ port_a = int(sys.argv[2])
 port_b = int(sys.argv[3])
 
 events_queue = Queue()
+consumer_group = []
+consumer_count = 0
+consumer_cumul_count = 0
 
 def producer_worker():
+    global producer_conn
     while True:
         events = producer_conn.recv(1000).decode()
         if not events:
@@ -27,15 +31,15 @@ def producer_worker():
         print("[Remain events: %d]" % events_queue.qsize())
 
 def consumer_worker(conn, num):
-    conn.send(num.encode())
+    global consumer_count
+    conn.send(str(num).encode())
     while True:
         events = conn.recv(1000).decode()
         if not events:
             conn.close()
             print("[Consumer %d disconnected]" % num)
             consumer_count-=1
-            if (consumer_count == 0):
-                print("[0 consumers online]")
+            print("[{consumer_count} consumers online]")
             break
         if (events_queue.empty()):
             conn.send("No event in queue".encode())
@@ -45,6 +49,7 @@ def consumer_worker(conn, num):
 
 def handleInt(signum, frame):
     print("\nexit")
+    producer_socket.close()
     sys.exit()
 
 signal.signal(signal.SIGINT, handleInt)
@@ -66,14 +71,14 @@ if (__name__ == '__main__'):
     consumer_socket.bind((host, port_b))
     consumer_socket.listen(5)
 
-    consumer_group = []
-    consumer_count = 0
-    consumer_cumul_count = 0
     while True: 
         consumer_conn, consumer_addr = consumer_socket.accept()
-
         consumer_count+=1
         consumer_cumul_count+=1
+        print("[Consumer {consumer_culmul_count} connected]")
+        print("[{consumer_count} consumers online]")
+
+
         consumer_group.append(consumer_conn)
 
         worker_thread = Thread(target = consumer_worker, args=(consumer_conn, consumer_cumul_count))
