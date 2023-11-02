@@ -14,17 +14,11 @@ def producer_worker():
         events = producer_conn.recv(1000).decode()
         if not events:
             producer_conn.close()
-            #comment out before submission
             print("[Producer disconnected]")
             break
-        ##이거 괜찮은 거 맞나?
         print("[Events created]")
         for index in range(0, len(events)):
             events_queue.put(events[index])
-    # ##producer 단위 확인용 iteration
-    # print("in queue: ")
-    # for event in iter(events_queue.get, None):
-    #     print("  %c" % event)
         print("[Remain events: %d]" % events_queue.qsize())
 
 def consumer_worker(conn, num):
@@ -67,7 +61,6 @@ if (__name__ == '__main__'):
     consumer_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     consumer_socket.bind((host, port_b))
     consumer_socket.listen(5)
-    consumer_group = []
     consumer_count = 0
     consumer_cumul_count = 0
 
@@ -77,9 +70,6 @@ if (__name__ == '__main__'):
         consumer_cumul_count+=1
         print(f"[Consumer {consumer_cumul_count} connected]")
         print(f"[{consumer_count} consumers online]")
-
-
-        consumer_group.append(consumer_conn)
 
         worker_thread = Thread(target = consumer_worker, args=(consumer_conn, consumer_cumul_count))
         worker_thread.start()

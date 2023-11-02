@@ -11,7 +11,6 @@ print("Connected, consumer %d" % consumer_number)
 def handleInt(signum, frame):
     print("\nexit")
     sys.exit()
-
 signal.signal(signal.SIGINT, handleInt)
 
 while True:

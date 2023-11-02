@@ -17,5 +17,4 @@ signal.signal(signal.SIGINT, handleInt)
 while True:
     events = input()
     print("%d events are created" % len(events))
-
     sc.send(events.encode())
