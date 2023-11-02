@@ -41,6 +41,7 @@ def consumer_worker(conn, num):
 def handleInt(signum, frame):
     print("\nexit")
     producer_socket.close()
+    consumer_socket.close()
     sys.exit()
 
 signal.signal(signal.SIGINT, handleInt)

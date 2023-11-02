@@ -10,6 +10,7 @@ sc.connect((host, port))
 
 def handleInt(signum, frame):
     print("\nexit")
+    sc.close()
     sys.exit()
 
 signal.signal(signal.SIGINT, handleInt)

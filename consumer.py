@@ -10,6 +10,7 @@ print("Connected, consumer %d" % consumer_number)
 
 def handleInt(signum, frame):
     print("\nexit")
+    sc.close()
     sys.exit()
 signal.signal(signal.SIGINT, handleInt)
 
